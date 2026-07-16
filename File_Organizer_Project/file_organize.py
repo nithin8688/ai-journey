@@ -96,7 +96,7 @@ class FileOrganizer:
 
     def dry_run(self):
         """Previews what organize() would do - without moving anything."""
-        print("── DRY RUN PREVIEW ──────────────────────────")
+        planned_moves = []
         for item in os.listdir(self.source_folder):
             if item == "move_log.json":
                 continue 
@@ -104,12 +104,16 @@ class FileOrganizer:
             if os.path.isfile(full_path):
                 subfolder = self.get_destination_folder(item)
                 dest = os.path.join(self.source_folder, subfolder, item)
-                print(f"  [DRY RUN] {item} -> {dest}")
-        print("── NO FILES WERE MOVED ──────────────────────\n")
+                planned_moves.append({
+                    "file": item,
+                    "from": full_path,
+                    "to": dest,
+                    "category": subfolder
+                })
+        return planned_moves 
 
     def organize(self):
         """Move all files in source_folder into categorized subfolders."""
-        print("── ORGANIZING ───────────────────────────────")
         for item in os.listdir(self.source_folder):
             if item == "move_log.json":
                 continue
@@ -117,6 +121,7 @@ class FileOrganizer:
             if os.path.isfile(full_path):
                 self.move_file(item)
         self.save_log()
+        return self.move_log
 
     def log_move(self, filename, destination, action):
         """Appends a move record to the in-memory log."""
