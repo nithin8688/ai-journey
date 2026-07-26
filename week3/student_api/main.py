@@ -69,3 +69,16 @@ async def remove_student(student_id: int, db: Session = Depends(get_db)):
     if delete is None:
         raise HTTPException(status_code=404, detail="student not found")
     return delete
+
+@app.get("/students/search", response_model=List[StudentResponse])
+async def search_students(
+    name: str = None,
+    subject: str = None,
+    db: Session = Depends(get_db)
+):
+    query = db.query(Student)
+    if name:
+        query = query.filter(Student.name.ilike(f"%{name}%"))
+    if subject:
+        query = query.filter(Student.subject.ilike(f"%{subject}"))
+    return query.all()
